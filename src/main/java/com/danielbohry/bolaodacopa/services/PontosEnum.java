@@ -8,6 +8,10 @@ public enum PontosEnum {
 
     private Integer pontos;
 
+    public Integer getPontos() {
+        return pontos;
+    }
+
     PontosEnum(Integer pontos) {
         this.pontos = pontos;
     }

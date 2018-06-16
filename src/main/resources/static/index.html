@@ -22,11 +22,27 @@
         </ul>
     </div>
 
+    <div>
+        <h2>Apostadores:</h2>
+        <ul id="apostadores-list" class="list-group">
+        </ul>
+    </div>
+
 </div>
 <script type="text/javascript">
     var partidas = $.get("/api/partidas", function(data) {
         $.each(data, function(i, partida) {
-            $("#partidas-list").append('<li class="list-group-item d-flex justify-content-between align-items-center">' + partida.timeA + ' x ' + partida.timeB + '<span class="badge badge-primary badge-pill">' + partida.id + '</span></li>');
+            $("#partidas-list").append('<li class="list-group-item d-flex justify-content-between align-items-center">' + partida.timeA + ' ' + partida.resultadoTimeA + ' x ' + partida.resultadoTimeB +' '+ partida.timeB + '<span class="badge badge-primary badge-pill">' + partida.id + '</span></li>');
+        });
+    });
+
+    var apostadores = $.get("/api/apostadores", function(data) {
+        $.each(data, function(i, apostador) {
+            var pontos = undefined;
+            $.get("/api/apostadores/" + apostador.id + "/pontos", function(data) {
+                pontos = data;
+                $("#apostadores-list").append('<li class="list-group-item d-flex justify-content-between align-items-center">' + apostador.nome + ' [' + pontos + ']<span class="badge badge-primary badge-pill">' + apostador.id + '</span></li>');
+            });
         });
     });
 </script>

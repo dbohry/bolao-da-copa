@@ -30,4 +30,14 @@ public class PartidaService {
         return repo.save(p);
     }
 
+    public String getVencedor(Partida partida) {
+        if (partida.getResultadoTimeA() > partida.getResultadoTimeB()) {
+            return partida.getTimeA();
+        } else if (partida.getResultadoTimeA() < partida.getResultadoTimeB()) {
+            return partida.getTimeB();
+        } else {
+            return "empate";
+        }
+    }
+
 }

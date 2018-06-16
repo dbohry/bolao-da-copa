@@ -2,7 +2,9 @@ package com.danielbohry.bolaodacopa.services;
 
 import com.danielbohry.bolaodacopa.entities.Apostador;
 import com.danielbohry.bolaodacopa.entities.Palpite;
+import com.danielbohry.bolaodacopa.entities.Partida;
 import com.danielbohry.bolaodacopa.repositories.ApostadorRepository;
+import com.danielbohry.bolaodacopa.repositories.PartidaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
@@ -17,6 +19,9 @@ public class ApostadorService {
 
     @Autowired
     private ApostadorRepository repo;
+
+    @Autowired
+    private PartidaService partidaService;
 
     public List<Apostador> buscar() {
         return repo.findAll();
@@ -45,6 +50,66 @@ public class ApostadorService {
         } else {
             throw new ResourceAccessException(MSG_ERRO_APOSTADOR_NAO_EXISTE);
         }
+    }
+
+    public Integer buscarPontuacao(String id) {
+        Optional<Apostador> entity = repo.findById(id);
+
+        if (entity.isPresent()) {
+            Apostador apostador = entity.get();
+            List<Palpite> palpites = apostador.getPalpites();
+            List<Partida> partidas = partidaService.buscar();
+            return calculaPontuacao(palpites, partidas);
+        } else {
+            throw new ResourceAccessException(MSG_ERRO_APOSTADOR_NAO_EXISTE);
+        }
+    }
+
+    private Integer calculaPontuacao(List<Palpite> palpites, List<Partida> partidas) {
+        Integer total = 0;
+
+        for (Palpite p : palpites) {
+            Integer pontos = 0;
+
+            Optional<Partida> partidaApostada = partidas.stream()
+                    .filter(partida -> isPartidaApostada(p, partida))
+                    .findFirst();
+
+            if (partidaApostada.isPresent()) {
+                if (isResultadoExato(p, partidaApostada.get()))
+                    pontos = pontos + PontosEnum.RESULTADO.getPontos();
+
+                String vencedor = partidaService.getVencedor(partidaApostada.get());
+
+                if (vencedor.equals(getPalpiteVencedor(p)))
+                    pontos = pontos + PontosEnum.VENCEDOR.getPontos();
+
+                total = total + pontos;
+            }
+
+        }
+
+        return total;
+    }
+
+    private String getPalpiteVencedor(Palpite palpite) {
+        if (palpite.getResultadoTimeA() > palpite.getResultadoTimeB()) {
+            return palpite.getTimeA();
+        } else if (palpite.getResultadoTimeA() < palpite.getResultadoTimeB()) {
+            return palpite.getTimeB();
+        } else {
+            return "empate";
+        }
+    }
+
+    private boolean isResultadoExato(Palpite p, Partida partidaApostada) {
+        return partidaApostada.getResultadoTimeA().equals(p.getResultadoTimeA())
+                && partidaApostada.getResultadoTimeB().equals(p.getResultadoTimeB());
+    }
+
+    private boolean isPartidaApostada(Palpite p, Partida partida) {
+        return partida.getTimeA().equals(p.getTimeA())
+                && partida.getTimeB().equals(p.getTimeB());
     }
 
 }

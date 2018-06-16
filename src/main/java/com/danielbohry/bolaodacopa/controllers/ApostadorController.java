@@ -41,4 +41,10 @@ public class ApostadorController {
         Apostador response = service.adicionarPalpite(id, palpite);
         return ResponseEntity.ok().body(response);
     }
+
+    @GetMapping("/{id}/pontos")
+    public ResponseEntity<Integer> buscarPontuacao(@PathVariable("id") String id) {
+        Integer response = service.buscarPontuacao(id);
+        return ResponseEntity.ok().body(response);
+    }
 }
