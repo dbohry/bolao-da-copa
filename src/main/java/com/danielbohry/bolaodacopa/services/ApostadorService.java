@@ -76,14 +76,13 @@ public class ApostadorService {
                     .findFirst();
 
             if (partidaApostada.isPresent()) {
-                if (isResultadoExato(p, partidaApostada.get()))
-                    pontos = pontos + PontosEnum.RESULTADO.getPontos();
-
                 String vencedor = partidaService.getVencedor(partidaApostada.get());
 
-                if (vencedor.equals(getPalpiteVencedor(p)))
+                if (isResultadoExato(p, partidaApostada.get()))
+                    pontos = pontos + PontosEnum.RESULTADO.getPontos();
+                else if (vencedor.equals(getPalpiteVencedor(p)))
                     pontos = pontos + PontosEnum.VENCEDOR.getPontos();
-
+                
                 total = total + pontos;
             }
 
